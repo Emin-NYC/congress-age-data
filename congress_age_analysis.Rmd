@@ -1,0 +1,62 @@
+---
+title: "Congress_Demographics_Analysis"
+author: "Emin Allen"
+date: "2024-09-08"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+```{r load-libraries}
+# Load necessary libraries
+library(readr)
+library(dplyr)
+library(ggplot2)
+```
+
+```{r load-data}
+# Load data from GitHub
+data <- read_csv("https://raw.githubusercontent.com/Emin-NYC/congress-age-data/main/data_aging_congress.csv")
+
+# Create relevant subset of the data
+data_subset <- data[, c("congress", "chamber", "age_years", "party_code", "generation")]
+
+# Rename columns
+colnames(data_subset) <- c("Congress", "Chamber", "Age", "Party", "Generation")
+
+# Transform columns
+data_subset$Party <- ifelse(data_subset$Party == 100, "Democrat", 
+                            ifelse(data_subset$Party == 200, "Republican", "Other"))
+data_subset$Age <- round(data_subset$Age)
+```
+
+## Testing the hypothesis: Is Congress Older than Ever Before?
+
+```{r analysis}
+# Calculate average age by Congress
+congress_average_age <- data_subset %>%
+  group_by(Congress) %>%
+  summarise(Average_Age = mean(Age, na.rm = TRUE))
+
+# Show the first few rows of the result
+head(congress_average_age)
+```
+
+## Plotting a graph to visualize the average age of Congress over time
+
+
+```{r plot-age}
+# Plot average age over time
+ggplot(congress_average_age, aes(x = Congress, y = Average_Age)) +
+  geom_line(color = "blue") +
+  geom_point() +
+  labs(title = "Average Age of Congress over Time", x = "Congress", y = "Average Age") +
+  theme_minimal()
+```
+
+## Conclusion
+
+Our graph results show that the average age of Congress has indeed increased over time, confirming the hypothesis. Future analysis could potentially explore the differences in age between political parties and how that might influence policy making.
